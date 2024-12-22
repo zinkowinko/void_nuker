@@ -1,5 +1,5 @@
 {
-  "token": "MTMxMTkzMzE1MzczNjI2MTY0Mw.GQOrZs.l2IBI-LToaITYh79p1QLpfBDLWCfc20G9P4HMQ",
+  "token": "const token = process.env.DISCORD_TOKEN;",
   "prefix": "+",
   "status": {
     "isenabled": true,
