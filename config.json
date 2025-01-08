@@ -1,5 +1,5 @@
 {
-  "token": "const token = process.env.DISCORD_TOKEN;",
+  "token": "YOUR BOT TOKEN HERE",
   "prefix": "+",
   "status": {
     "isenabled": true,
