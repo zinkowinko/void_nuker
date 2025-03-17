@@ -225,3 +225,4 @@ keep_alive()
 
 # by zinko give credits
 bot.run(token)  # by zinko give credits
+# thanks
